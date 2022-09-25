@@ -217,6 +217,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Grip Force",
+                    "type": "Value",
+                    "id": "151ce0d3-6756-4c57-ac22-50615d1efd27",
+                    "expectedControlType": "Analog",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
                     "name": "Select Value",
                     "type": "Value",
                     "id": "e6005f29-e4c1-4f3b-8bf7-3a28bab5ca9c",
@@ -366,6 +375,17 @@
                     "processors": "ScaleVector2(x=0),StickDeadzone",
                     "groups": "Generic XR Controller",
                     "action": "Translate Anchor",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "02b75cc6-2fde-43d7-a377-ca1962f5c84a",
+                    "path": "<ValveIndexController>{LeftHand}/gripForce",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Generic XR Controller",
+                    "action": "Grip Force",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
@@ -708,6 +728,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "Grip Force",
+                    "type": "Value",
+                    "id": "cc80f9aa-4515-434f-88c4-5e88f947aa8e",
+                    "expectedControlType": "Analog",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -796,6 +825,17 @@
                     "processors": "ScaleVector2(x=0),StickDeadzone",
                     "groups": "Generic XR Controller",
                     "action": "Translate Anchor",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "51fe62c6-d06d-4b4c-920a-ba833f52bc7a",
+                    "path": "<ValveIndexController>{RightHand}/gripForce",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Generic XR Controller",
+                    "action": "Grip Force",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
