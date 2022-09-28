@@ -16,16 +16,10 @@ public class NodeBehaviour : MonoBehaviour
         get { return nodeInfo; }
         set { nodeInfo = value; NodeInfoChanged(); }
     }
-    public string Name
-    {
-        get { return UIName.text; }
-        set { UIName.text = value; }
-    }
     public Vector3 position;
     private XRReSnapGrabbable interactable;
     private void NodeInfoChanged()
     {
-        Name = NodeInfo.func;
         position = new Vector3(NodeInfo.x_pos, NodeInfo.y_pos, NodeInfo.z_pos);
     }
 

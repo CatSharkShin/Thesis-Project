@@ -26,8 +26,8 @@ public class NodeObject : IDisposable
         this.id = nodeinfo.uid;
         Go = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/Node"), parent, false);
         node = Go.GetComponent<NodeBehaviour>();
-        node.NodeInfo = nodeinfo;
         node.nodeManager = parent.GetComponent<NodeManager>();
+        node.NodeInfo = nodeinfo;
         Go.transform.SetParent(parent);
     }
     public NodeObject(Transform parent,NodeInfo nodeinfo,float size):this(parent,nodeinfo)
@@ -111,14 +111,6 @@ public class NodeManager : MonoBehaviour
         List<NodeInfo> nodeinfos = NNApi.GetNetwork();
         foreach (NodeInfo nodeinfo in nodeinfos)
         {
-            /*if (!NetworkColors.ContainsKey(nodeinfo.id))
-            {
-                NetworkColors.Add(nodeinfo.id, Random.ColorHSV());
-            }*/
-            if (!Networks.Contains(nodeinfo.id))
-            {
-                Networks.Add(nodeinfo.id);
-            }
             if (Nodes.TryGetValue(nodeinfo.uid,out NodeObject node))
             {
                 node.NodeInfo = nodeinfo;
@@ -126,6 +118,11 @@ public class NodeManager : MonoBehaviour
             else
             {
                 Nodes.Add(nodeinfo.uid, new NodeObject(transform, nodeinfo));
+            }
+
+            if (!Networks.Contains(nodeinfo.id))
+            {
+                Networks.Add(nodeinfo.id);
             }
         }
     }
@@ -247,7 +244,7 @@ public class NodeManager : MonoBehaviour
         AutoSize();
     }
     bool sizing = false;
-    Vector3 setToScale;
+    Vector3 setToScale = Vector3.one;
     private void AutoSize()
     {
         if (sizing)
