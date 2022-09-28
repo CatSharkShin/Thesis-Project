@@ -242,39 +242,64 @@ public class NodeManager : MonoBehaviour
     void Update()
     {
         AutoSize();
+        AutoPosition();
+    }
+    Vector3 gizmosphere = new Vector3();
+    private void AutoPosition()
+    {
+        Vector3 nodePosSum = Vector3.zero;
+        int nodeCount = 0;
+        float minY = float.MaxValue;
+        float maxY = float.MinValue;
+        foreach (KeyValuePair<int, NodeObject> node in Nodes)
+        {
+            if (!node.Value.node.isGrabbed)
+            {
+                if (node.Value.Go.transform.localPosition.y < minY)
+                    minY = node.Value.Go.transform.localPosition.y;
+
+                if (node.Value.Go.transform.localPosition.y > maxY)
+                    maxY = node.Value.Go.transform.localPosition.y;
+
+                nodePosSum += node.Value.Go.transform.localPosition;
+                nodeCount++;
+            }
+        }
+
+        transform.localPosition = -(nodePosSum / nodeCount) * transform.localScale.x + new Vector3(0, (maxY/2)*transform.localScale.x,0);
+    }
+    public void OnDrawGizmos()
+    {
+        Gizmos.DrawSphere(gizmosphere, 0.1f);
     }
     bool sizing = false;
     Vector3 setToScale = Vector3.one;
     private void AutoSize()
     {
+        // data mapping to min-max is a solution if this isnt sufficient
         if (sizing)
         {
-            // I should probably set the scaling size depending on the acquired data from the server
-            // since the data inside the visualization keeps changing from many things, movement, grabbing etc.
-            // Or checking the nodes' desired position would be better too since that doesn't change when grabbing
             transform.localScale = Vector3.Lerp(transform.localScale, setToScale, Time.deltaTime);
             if (transform.localScale.x < setToScale.x*1.05f)
                 sizing = false;
         }
-        else
-        {
-        }
-        float mDistance = 0;
+        float mxDistance = maxDistance;
         foreach (KeyValuePair<int, NodeObject> node in Nodes)
         {
             if (!node.Value.node.isGrabbed)
             {
                 float distance = Vector3.Distance(node.Value.node.position, Vector3.zero);
-                if (distance > mDistance)
-                    mDistance = distance;
+                if (distance > mxDistance)
+                    mxDistance = distance;
             }
         }
-        if (mDistance > maxDistance || mDistance < maxDistance*0.95f)
+        if (mxDistance > maxDistance || mxDistance < maxDistance*0.95f)
         {
-            float newScale = ((maxDistance / mDistance));
+            float newScale = ((maxDistance / mxDistance));
             setToScale = new Vector3(newScale, newScale, newScale);
             sizing = true;
         }
-        nodeSize = ((maxDistance) / (Nodes.Count*2)) * (1/transform.localScale.x);
+        if(Nodes.Count > 0)
+            nodeSize = ((maxDistance) / (Nodes.Count*2)) * (1/transform.localScale.x);
     }
 }

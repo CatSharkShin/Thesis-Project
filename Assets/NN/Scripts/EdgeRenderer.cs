@@ -24,7 +24,7 @@ public class EdgeRenderer : MonoBehaviour
         {
             lineRenderer.SetPosition(0, A.transform.position);
             lineRenderer.SetPosition(1, B.transform.position);
+            lineRenderer.startWidth = lineRenderer.endWidth = ((A.lossyScale.x + B.lossyScale.x) / 2) * nodeManager.edgeWidth;
         }
-        lineRenderer.startWidth = lineRenderer.endWidth = ((A.lossyScale.x+B.lossyScale.x)/2)*nodeManager.edgeWidth;
     }
 }
