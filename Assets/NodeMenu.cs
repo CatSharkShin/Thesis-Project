@@ -17,8 +17,8 @@ public class NodeMenu : MonoBehaviour
     {
         if(node.NodeInfo != null)
         {
-            ID.text = node.NodeInfo.uid.ToString();
-            Network.text = node.NodeInfo.id.ToString();
+            ID.text = node.NodeInfo.nodeID.ToString();
+            Network.text = node.NodeInfo.networkID.ToString();
             Func.text = node.NodeInfo.func;
         }
     }

@@ -23,8 +23,8 @@ public class NodeObject : IDisposable
     }
     public NodeObject(Transform parent,NodeInfo nodeinfo)
     {
-        this.id = nodeinfo.uid;
         Go = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/Node"), parent, false);
+        this.id = nodeinfo.nodeID;
         node = Go.GetComponent<NodeBehaviour>();
         node.nodeManager = parent.GetComponent<NodeManager>();
         node.NodeInfo = nodeinfo;
@@ -111,18 +111,18 @@ public class NodeManager : MonoBehaviour
         List<NodeInfo> nodeinfos = NNApi.GetNetwork();
         foreach (NodeInfo nodeinfo in nodeinfos)
         {
-            if (Nodes.TryGetValue(nodeinfo.uid,out NodeObject node))
+            if (Nodes.TryGetValue(nodeinfo.nodeID,out NodeObject node))
             {
                 node.NodeInfo = nodeinfo;
             }
             else
             {
-                Nodes.Add(nodeinfo.uid, new NodeObject(transform, nodeinfo));
+                Nodes.Add(nodeinfo.nodeID, new NodeObject(transform, nodeinfo));
             }
 
-            if (!Networks.Contains(nodeinfo.id))
+            if (!Networks.Contains(nodeinfo.networkID))
             {
-                Networks.Add(nodeinfo.id);
+                Networks.Add(nodeinfo.networkID);
             }
         }
     }
@@ -242,31 +242,56 @@ public class NodeManager : MonoBehaviour
     void Update()
     {
         AutoSize();
-        AutoPosition();
+        AutoPositionMinMax();
     }
     Vector3 gizmosphere = new Vector3();
-    private void AutoPosition()
+    private void AutoPositionAvg()
     {
+        //This uses all data to calculate an average position
         Vector3 nodePosSum = Vector3.zero;
         int nodeCount = 0;
         float minY = float.MaxValue;
-        float maxY = float.MinValue;
         foreach (KeyValuePair<int, NodeObject> node in Nodes)
         {
             if (!node.Value.node.isGrabbed)
             {
-                if (node.Value.Go.transform.localPosition.y < minY)
-                    minY = node.Value.Go.transform.localPosition.y;
+                if (node.Value.NodeInfo.y_pos < minY)
+                    minY = node.Value.NodeInfo.y_pos;
 
-                if (node.Value.Go.transform.localPosition.y > maxY)
-                    maxY = node.Value.Go.transform.localPosition.y;
-
-                nodePosSum += node.Value.Go.transform.localPosition;
+                nodePosSum += node.Value.NodeInfo.position;
                 nodeCount++;
             }
         }
+        Vector3 avgNodePos = (nodePosSum / nodeCount);
+        transform.localPosition = -avgNodePos * transform.localScale.x + new Vector3(0, (avgNodePos.y-minY)*transform.localScale.x,0);
+    }
+    private void AutoPositionMinMax()
+    {
+        Vector3 mins = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+        Vector3 maxes = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+        foreach (KeyValuePair<int, NodeObject> node in Nodes)
+        {
+            if (!node.Value.node.isGrabbed)
+            {
+                if (node.Value.NodeInfo.x_pos < mins.x)
+                    mins.x = node.Value.NodeInfo.x_pos;
+                if (node.Value.NodeInfo.y_pos < mins.y)
+                    mins.y = node.Value.NodeInfo.y_pos;
+                if (node.Value.NodeInfo.z_pos < mins.z)
+                    mins.z = node.Value.NodeInfo.z_pos;
 
-        transform.localPosition = -(nodePosSum / nodeCount) * transform.localScale.x + new Vector3(0, (maxY/2)*transform.localScale.x,0);
+                if (node.Value.NodeInfo.x_pos > maxes.x)
+                    maxes.x = node.Value.NodeInfo.x_pos;
+                if (node.Value.NodeInfo.y_pos > maxes.y)
+                    maxes.y = node.Value.NodeInfo.y_pos;
+                if (node.Value.NodeInfo.z_pos > maxes.z)
+                    maxes.z = node.Value.NodeInfo.z_pos;
+            }
+        }
+        maxes *= transform.localScale.x;
+        mins *= transform.localScale.x;
+        Vector3 avgNodePos = new Vector3((maxes.x+mins.x), (maxes.y + mins.y), (maxes.z + mins.z))/2;
+        transform.localPosition = -avgNodePos + new Vector3(0, (avgNodePos.y - mins.y), 0);
     }
     public void OnDrawGizmos()
     {

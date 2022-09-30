@@ -7,36 +7,24 @@ using UnityEngine;
 public class NodeBehaviour : MonoBehaviour
 {
     private TextMeshPro UIName;
-    private NodeInfo nodeInfo;
+    private NodeInfo nodeInfo = new NodeInfo();
     public NodeManager nodeManager;
     public bool isGrabbed;
     public Material material;
     public NodeInfo NodeInfo
     {
         get { return nodeInfo; }
-        set { nodeInfo = value; NodeInfoChanged(); }
+        set { nodeInfo = value; }
     }
-    public Vector3 position;
+    public Vector3 position {
+        get { return nodeInfo.position; }
+        set { nodeInfo.position = value; }
+    }
     private XRReSnapGrabbable interactable;
-    private void NodeInfoChanged()
-    {
-        position = new Vector3(NodeInfo.x_pos, NodeInfo.y_pos, NodeInfo.z_pos);
-    }
-
     void Awake()
     {
         interactable = this.GetComponent<XRReSnapGrabbable>();
         UIName = transform.GetChild(1).GetComponent<TextMeshPro>();
-        /*
-        material = (Material)Instantiate(Resources.Load("Materials/Neuron"));
-        transform.GetChild(0).GetComponent<MeshRenderer>().sharedMaterial = material;
-        material.SetColor(0, Color.red);*/
-
-        this.transform.localPosition = position;
-    }
-    private void Start()
-    {
-        SetColor();
     }
     void Update()
     {
@@ -44,11 +32,16 @@ public class NodeBehaviour : MonoBehaviour
         if(!interactable.isSelected)
             this.transform.localPosition = Vector3.Lerp(transform.localPosition,position,Time.deltaTime*1.5f);
     }
+    private void Start()
+    {
+        SetColor();
+    }
     private void SetColor()
     {
-        float hue = (float)nodeManager.Networks.IndexOf(nodeInfo.id)/ nodeManager.Networks.Count;
+        float hue = (float)nodeManager.Networks.IndexOf(nodeInfo.networkID)/ nodeManager.Networks.Count;
         transform.GetComponentInChildren<MeshRenderer>().material.SetColor("_Color", Color.HSVToRGB(hue,1,1));
     }
+
     public void Selected()
     {
         isGrabbed = true;
@@ -61,6 +54,6 @@ public class NodeBehaviour : MonoBehaviour
     {
         //Removes itself from the list on destroy
         //Added it so i can test the auto sizing
-        nodeManager.Nodes.Remove(nodeInfo.uid);
+        nodeManager.Nodes.Remove(nodeInfo.nodeID);
     }
 }

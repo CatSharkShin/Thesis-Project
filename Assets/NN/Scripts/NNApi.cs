@@ -7,18 +7,31 @@ using System;
 using System.IO;
 using System.Net;
 using Newtonsoft.Json;
+using Thry;
+
 public class NodeInfo
 {
-    public int uid { get; set; }
-    public int id { get; set; }
-    public int hid { get; set; }
+    public int nodeID { get; set; }
+    public int networkID { get; set; }
+    public int funcID { get; set; }
     public string func { get; set; }
-    public int max { get; set; }
+    public float max { get; set; }
     public int act { get; set; }
-    public int x_pos { get; set; }
-    public int y_pos { get; set; }
-    public int z_pos { get; set; }
+    public float x_pos { get; set; }
+    public float y_pos { get; set; }
+    public float z_pos { get; set; }
     public string model { get; set; }
+    public Vector3 position {
+        get {
+            return new Vector3(x_pos, y_pos, z_pos);
+        } 
+        set {
+            x_pos = value.x;
+            y_pos = value.y;
+            z_pos = value.z;
+
+        } 
+    }
 }
 public class RelationInfo
 {
@@ -35,16 +48,20 @@ public class RelationInfo
 }
 public class NNApi
 {
+    //private static readonly string url = "https://snetwork.uni-eszterhazy.hu/";
+    private static readonly string url = "http://localhost:8000/";
     private static readonly HttpClient httpClient = new HttpClient();
     public static List<NodeInfo> GetNetwork()
     {
-        string result = Get("http://127.0.0.1:8000/network");
+        string endpoint = "network";
+        string result = Get(url+endpoint);
         Debug.Log(result);
         return JsonConvert.DeserializeObject<List<NodeInfo>>(result);
     }
     public static List<RelationInfo> GetRelations()
     {
-        string result = Get("http://127.0.0.1:8000/relations");
+        string endpoint = "relations";
+        string result = Get(url + endpoint);
         Debug.Log(result);
         return JsonConvert.DeserializeObject<List<RelationInfo>>(result);
     }
