@@ -1714,12 +1714,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0e00bd371ce07f4fa0689a86c759a88, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  minNodePosition: {x: 0, y: 0, z: 0}
+  maxNodePosition: {x: 0, y: 0, z: 0}
   maxNodes: 200
   maxEdges: 2000
   update: 0.01
   nodeSize: 0
   edgeWidth: 0.3
-  maxDistance: 6
+  size: {x: 5, y: 5, z: 5}
+  offset: {x: 0, y: 0, z: 0}
 --- !u!1 &1168878795
 GameObject:
   m_ObjectHideFlags: 0

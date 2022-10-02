@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.Networking.Types;
 using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
@@ -29,6 +30,42 @@ public class NodeObject : IDisposable
         node.nodeManager = parent.GetComponent<NodeManager>();
         node.NodeInfo = nodeinfo;
         Go.transform.SetParent(parent);
+        UpdateNodeManager();
+    }
+    public void UpdateNodeManager()
+    {
+        //min
+        if (NodeInfo.position.x < node.nodeManager.minNodePosition.x)
+        {
+            node.nodeManager.minNodePosition.x = NodeInfo.position.x;
+        }
+        if (NodeInfo.position.y < node.nodeManager.minNodePosition.y)
+        {
+            node.nodeManager.minNodePosition.y = NodeInfo.position.y;
+        }
+        if (NodeInfo.position.z < node.nodeManager.minNodePosition.z)
+        {
+            node.nodeManager.minNodePosition.z = NodeInfo.position.z;
+        }
+        //max
+        if (NodeInfo.position.x > node.nodeManager.maxNodePosition.x)
+        {
+            node.nodeManager.maxNodePosition.x = NodeInfo.position.x;
+        }
+        if (NodeInfo.position.y > node.nodeManager.maxNodePosition.y)
+        {
+            node.nodeManager.maxNodePosition.y = NodeInfo.position.y;
+        }
+        if (NodeInfo.position.z > node.nodeManager.maxNodePosition.z)
+        {
+            node.nodeManager.maxNodePosition.z = NodeInfo.position.z;
+        }
+
+        // Network update
+        if (!node.nodeManager.Networks.Contains(NodeInfo.networkID))
+        {
+            node.nodeManager.Networks.Add(NodeInfo.networkID);
+        }
     }
     public NodeObject(Transform parent,NodeInfo nodeinfo,float size):this(parent,nodeinfo)
     {
@@ -86,13 +123,31 @@ public class NodeManager : MonoBehaviour
 
     //public Dictionary<int, Color> NetworkColors { get; }
     public List<int> Networks { get; }
+    public Vector3 minNodePosition = Vector3.zero;
+
+    public Vector3 maxNodePosition = Vector3.zero;
 
     public int maxNodes;
     public int maxEdges;
     public float update;
     public float nodeSize;
     public float edgeWidth;
-    public float maxDistance;
+    public Vector3 size;
+    public Vector3 offset;
+    public Vector3 MinDistance
+    {
+        get
+        {
+            return new Vector3(-size.x / 2, -size.y / 2, -size.z / 2) + new Vector3(0, +size.y / 2, 0) + offset;
+        }
+    }
+    public Vector3 MaxDistance
+    {
+        get
+        {
+            return new Vector3(size.x / 2, size.y / 2, size.z / 2) + new Vector3(0, +size.y / 2, 0) + offset;
+        }
+    }
     public NodeManager()
     {
         Nodes = new Dictionary<int,NodeObject>();
@@ -120,10 +175,6 @@ public class NodeManager : MonoBehaviour
                 Nodes.Add(nodeinfo.nodeID, new NodeObject(transform, nodeinfo));
             }
 
-            if (!Networks.Contains(nodeinfo.networkID))
-            {
-                Networks.Add(nodeinfo.networkID);
-            }
         }
     }
     private void MatchRelations()
@@ -242,9 +293,8 @@ public class NodeManager : MonoBehaviour
     void Update()
     {
         AutoSize();
-        AutoPositionMinMax();
+        //AutoPositionMinMax();
     }
-    Vector3 gizmosphere = new Vector3();
     private void AutoPositionAvg()
     {
         //This uses all data to calculate an average position
@@ -293,10 +343,6 @@ public class NodeManager : MonoBehaviour
         Vector3 avgNodePos = new Vector3((maxes.x+mins.x), (maxes.y + mins.y), (maxes.z + mins.z))/2;
         transform.localPosition = -avgNodePos + new Vector3(0, (avgNodePos.y - mins.y), 0);
     }
-    public void OnDrawGizmos()
-    {
-        Gizmos.DrawSphere(gizmosphere, 0.1f);
-    }
     bool sizing = false;
     Vector3 setToScale = Vector3.one;
     private void AutoSize()
@@ -304,11 +350,11 @@ public class NodeManager : MonoBehaviour
         // data mapping to min-max is a solution if this isnt sufficient
         if (sizing)
         {
-            transform.localScale = Vector3.Lerp(transform.localScale, setToScale, Time.deltaTime);
+            //transform.localScale = Vector3.Lerp(transform.localScale, setToScale, Time.deltaTime);
             if (transform.localScale.x < setToScale.x*1.05f)
                 sizing = false;
         }
-        float mxDistance = maxDistance;
+        float mxDistance = size.x;
         foreach (KeyValuePair<int, NodeObject> node in Nodes)
         {
             if (!node.Value.node.isGrabbed)
@@ -318,13 +364,13 @@ public class NodeManager : MonoBehaviour
                     mxDistance = distance;
             }
         }
-        if (mxDistance > maxDistance || mxDistance < maxDistance*0.95f)
+        if (mxDistance > size.Avg() || mxDistance < size.Avg() * 0.95f)
         {
-            float newScale = ((maxDistance / mxDistance));
+            float newScale = (size.Avg() / mxDistance);
             setToScale = new Vector3(newScale, newScale, newScale);
             sizing = true;
         }
         if(Nodes.Count > 0)
-            nodeSize = ((maxDistance) / (Nodes.Count*2)) * (1/transform.localScale.x);
+            nodeSize = ((size.Avg()) / (Nodes.Count*2)) * (1/transform.localScale.Avg());
     }
 }

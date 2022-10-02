@@ -28,9 +28,21 @@ public class NodeBehaviour : MonoBehaviour
     }
     void Update()
     {
+        if (!interactable.isSelected)
+        {
+            transform.localPosition = Vector3.Lerp(
+                transform.localPosition,
+                nodeInfo.position.Map(
+                    nodeManager.minNodePosition,
+                    nodeManager.maxNodePosition,
+                nodeManager.MinDistance,
+                nodeManager.MaxDistance),
+                Time.deltaTime
+                );
+                
+            //transform.localPosition = (new Vector3(top.x / bottom.x, top.y / bottom.y, top.z / bottom.z) - new Vector3(0.5f, 0.5f, 0.5f)) * nodeManager.maxDistance;
+        }
         transform.localScale = new Vector3(nodeManager.nodeSize, nodeManager.nodeSize, nodeManager.nodeSize);
-        if(!interactable.isSelected)
-            this.transform.localPosition = Vector3.Lerp(transform.localPosition,position,Time.deltaTime*1.5f);
     }
     private void Start()
     {

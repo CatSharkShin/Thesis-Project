@@ -48,8 +48,8 @@ public class RelationInfo
 }
 public class NNApi
 {
-    //private static readonly string url = "https://snetwork.uni-eszterhazy.hu/";
-    private static readonly string url = "http://localhost:8000/";
+    private static readonly string url = "https://snetwork.uni-eszterhazy.hu/";
+    //private static readonly string url = "http://localhost:8000/";
     private static readonly HttpClient httpClient = new HttpClient();
     public static List<NodeInfo> GetNetwork()
     {
