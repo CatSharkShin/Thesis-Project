@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.SceneManagement;
 using UnityEditor;
 using UnityEditor.UI;
 using UnityEngine;
