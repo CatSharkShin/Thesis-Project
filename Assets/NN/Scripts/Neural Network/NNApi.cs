@@ -21,6 +21,7 @@ public class NodeInfo
     public float y_pos { get; set; }
     public float z_pos { get; set; }
     public string model { get; set; }
+    [JsonIgnore]
     public Vector3 position {
         get {
             return new Vector3(x_pos, y_pos, z_pos);

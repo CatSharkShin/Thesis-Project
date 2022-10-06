@@ -12,7 +12,7 @@ using UnityEngine.Networking.Types;
 using UnityEngine.UIElements;
 using Random = UnityEngine.Random;
 
-public class NodeObject : IDisposable
+public class Node : IDisposable
 {
     public int id { get; }
     public GameObject Go { get; }
@@ -20,17 +20,23 @@ public class NodeObject : IDisposable
     public NodeInfo NodeInfo
     {
         get { return node.NodeInfo; }
-        set { node.NodeInfo = value; }
+        set { 
+            node.NodeInfo = value;
+            UpdateNodeManager();
+            node.nodeManager.CalculateBounds();
+        }
     }
-    public NodeObject(Transform parent,NodeInfo nodeinfo)
+    public Node(Transform parent,NodeInfo nodeinfo)
     {
         Go = GameObject.Instantiate(Resources.Load<GameObject>("Prefabs/Node"), parent, false);
         this.id = nodeinfo.nodeID;
         node = Go.GetComponent<NodeBehaviour>();
-        node.nodeManager = parent.GetComponent<NodeManager>();
+        node.nodeManager = parent.GetComponent<NetworkVisualiser>();
         node.NodeInfo = nodeinfo;
         Go.transform.SetParent(parent);
+        Go.transform.localScale = Vector3.zero;
         UpdateNodeManager();
+        node.nodeManager.CalculateBounds();
     }
     public void UpdateNodeManager()
     {
@@ -67,7 +73,7 @@ public class NodeObject : IDisposable
             node.nodeManager.Networks.Add(NodeInfo.networkID);
         }
     }
-    public NodeObject(Transform parent,NodeInfo nodeinfo,float size):this(parent,nodeinfo)
+    public Node(Transform parent,NodeInfo nodeinfo,float size):this(parent,nodeinfo)
     {
         Go.transform.localScale = new Vector3(size, size, size);
     }
@@ -96,7 +102,7 @@ public class Edge : IDisposable
         Go = new GameObject("EdgeRenderer");
         Go.transform.SetParent(parent);
         edge = Go.AddComponent<EdgeRenderer>();
-        edge.nodeManager = parent.GetComponent<NodeManager>();
+        edge.nodeManager = parent.GetComponent<NetworkVisualiser>();
         edge.A = edge.nodeManager.Nodes[relationInfo.cid1].Go.transform;
         edge.B = edge.nodeManager.Nodes[relationInfo.cid2].Go.transform;
     }
@@ -105,7 +111,7 @@ public class Edge : IDisposable
         Go = new GameObject("EdgeRenderer");
         Go.transform.SetParent(parent);
         edge = Go.AddComponent<EdgeRenderer>();
-        edge.nodeManager = parent.GetComponent<NodeManager>();
+        edge.nodeManager = parent.GetComponent<NetworkVisualiser>();
         edge.A = A;
         edge.B = B;
     }
@@ -114,11 +120,11 @@ public class Edge : IDisposable
         GameObject.Destroy(Go);
     }
 }
-public class NodeManager : MonoBehaviour
+public class NetworkVisualiser : MonoBehaviour
 {
     const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-    public Dictionary<int, NodeObject> Nodes { get; }
+    public Dictionary<int, Node> Nodes { get; }
     public Dictionary<int, Edge> Edges { get; }
 
     //public Dictionary<int, Color> NetworkColors { get; }
@@ -148,38 +154,88 @@ public class NodeManager : MonoBehaviour
             return new Vector3(size.x / 2, size.y / 2, size.z / 2) + new Vector3(0, +size.y / 2, 0) + offset;
         }
     }
-    public NodeManager()
+    public NetworkVisualiser()
     {
-        Nodes = new Dictionary<int,NodeObject>();
+        Nodes = new Dictionary<int,Node>();
         Edges = new Dictionary<int,Edge>();
         //NetworkColors = new Dictionary<int, Color>();
         Networks = new List<int>();
     }
+    public bool connectOnStart;
     void Start()
     {
         //StartCoroutine(useRandomGeneration());
-        MatchNetwork();
-        MatchRelations();
-    }
-    private void MatchNetwork()
-    {
-        List<NodeInfo> nodeinfos = NNApi.GetNetwork();
-        foreach (NodeInfo nodeinfo in nodeinfos)
+        if (connectOnStart)
         {
-            if (Nodes.TryGetValue(nodeinfo.nodeID,out NodeObject node))
+            MatchNetwork();
+            MatchRelations();
+        }
+    }
+    public void CalculateBounds()
+    {
+        minNodePosition = Vector3.zero;
+        maxNodePosition = Vector3.one;
+        //TODO: FIX ERROR:
+        // Happens when node count goes from 0 to 1
+        foreach (KeyValuePair<int,Node> kvp in Nodes)
+        {
+            Node node = kvp.Value;
+            //min
+            if (node.NodeInfo.position.x < minNodePosition.x)
+            {
+                minNodePosition.x = node.NodeInfo.position.x;
+            }
+            if (node.NodeInfo.position.y < minNodePosition.y)
+            {
+                minNodePosition.y = node.NodeInfo.position.y;
+            }
+            if (node.NodeInfo.position.z < minNodePosition.z)
+            {
+                minNodePosition.z = node.NodeInfo.position.z;
+            }
+            //max
+            if (node.NodeInfo.position.x > maxNodePosition.x)
+            {
+                maxNodePosition.x = node.NodeInfo.position.x;
+            }
+            if (node.NodeInfo.position.y > maxNodePosition.y)
+            {
+                maxNodePosition.y = node.NodeInfo.position.y;
+            }
+            if (node.NodeInfo.position.z > maxNodePosition.z)
+            {
+                maxNodePosition.z = node.NodeInfo.position.z;
+            }
+        }
+    }
+    public void MatchNetwork(List<NodeInfo> nodeInfos = null)
+    {
+        if (nodeInfos == null)
+            nodeInfos = NNApi.GetNetwork();
+        foreach(KeyValuePair<int,Node> node in Nodes.ToList())
+        {
+            if (nodeInfos.FirstOrDefault(n => n.nodeID == node.Value.NodeInfo.nodeID) == null)
+            {
+                Nodes.Remove(node.Key);
+                node.Value.Dispose();
+            }
+        }
+        foreach (NodeInfo nodeinfo in nodeInfos)
+        {
+            if (Nodes.TryGetValue(nodeinfo.nodeID,out Node node))
             {
                 node.NodeInfo = nodeinfo;
             }
             else
             {
-                Nodes.Add(nodeinfo.nodeID, new NodeObject(transform, nodeinfo));
+                Nodes.Add(nodeinfo.nodeID, new Node(transform, nodeinfo));
             }
-
         }
     }
-    private void MatchRelations()
+    public void MatchRelations(List<RelationInfo> relationinfos = null)
     {
-        List<RelationInfo> relationinfos = NNApi.GetRelations();
+        if(relationinfos == null)
+            relationinfos = NNApi.GetRelations();
         foreach (RelationInfo relationinfo in relationinfos)
         {
             if(Edges.TryGetValue(relationinfo.id, out Edge edge))
@@ -249,7 +305,7 @@ public class NodeManager : MonoBehaviour
             yield return new WaitForEndOfFrame();
         }
     } 
-    private NodeObject randomNode()
+    private Node randomNode()
     {
         string name = "";
         for (int j = 0; j < 10; j++)
@@ -261,7 +317,7 @@ public class NodeManager : MonoBehaviour
         nodeinfo.x_pos = (int)randomVector3().x;
         nodeinfo.y_pos = (int)randomVector3().y;
         nodeinfo.z_pos = (int)randomVector3().z;
-        return new NodeObject(this.transform, nodeinfo);
+        return new Node(this.transform, nodeinfo);
     }
     private Vector3 randomVector3()
     {
@@ -301,7 +357,7 @@ public class NodeManager : MonoBehaviour
         Vector3 nodePosSum = Vector3.zero;
         int nodeCount = 0;
         float minY = float.MaxValue;
-        foreach (KeyValuePair<int, NodeObject> node in Nodes)
+        foreach (KeyValuePair<int, Node> node in Nodes)
         {
             if (!node.Value.node.isGrabbed)
             {
@@ -319,7 +375,7 @@ public class NodeManager : MonoBehaviour
     {
         Vector3 mins = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
         Vector3 maxes = new Vector3(float.MinValue, float.MinValue, float.MinValue);
-        foreach (KeyValuePair<int, NodeObject> node in Nodes)
+        foreach (KeyValuePair<int, Node> node in Nodes)
         {
             if (!node.Value.node.isGrabbed)
             {
@@ -353,9 +409,9 @@ public class NodeManager : MonoBehaviour
             //transform.localScale = Vector3.Lerp(transform.localScale, setToScale, Time.deltaTime);
             if (transform.localScale.x < setToScale.x*1.05f)
                 sizing = false;
-        }
-        float mxDistance = size.x;
-        foreach (KeyValuePair<int, NodeObject> node in Nodes)
+        }/*
+        float mxDistance = size.Avg();
+        foreach (KeyValuePair<int, Node> node in Nodes)
         {
             if (!node.Value.node.isGrabbed)
             {
@@ -369,8 +425,8 @@ public class NodeManager : MonoBehaviour
             float newScale = (size.Avg() / mxDistance);
             setToScale = new Vector3(newScale, newScale, newScale);
             sizing = true;
-        }
+        }*/
         if(Nodes.Count > 0)
-            nodeSize = ((size.Avg()) / (Nodes.Count*2)) * (1/transform.localScale.Avg());
+            nodeSize = ((size.Avg()) / (Nodes.Count)) * (1/transform.localScale.Avg());
     }
 }

@@ -8,7 +8,7 @@ public class EdgeRenderer : MonoBehaviour
     public Transform A;
     public Transform B;
     private LineRenderer lineRenderer;
-    public NodeManager nodeManager;
+    public NetworkVisualiser nodeManager;
     private void Awake()
     {
         lineRenderer = this.AddComponent<LineRenderer>();

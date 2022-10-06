@@ -8,13 +8,15 @@ public class NodeBehaviour : MonoBehaviour
 {
     private TextMeshPro UIName;
     private NodeInfo nodeInfo = new NodeInfo();
-    public NodeManager nodeManager;
+    public NetworkVisualiser nodeManager;
     public bool isGrabbed;
     public Material material;
     public NodeInfo NodeInfo
     {
         get { return nodeInfo; }
-        set { nodeInfo = value; }
+        set { nodeInfo = value;
+            SetColor();
+        }
     }
     public Vector3 position {
         get { return nodeInfo.position; }
