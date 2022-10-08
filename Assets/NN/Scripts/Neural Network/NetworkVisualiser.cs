@@ -36,6 +36,7 @@ public class Node : IDisposable
     }
     public void UpdateNodeManager()
     {
+        /*
         //min
         if (NodeInfo.position.x < node.nodeManager.minNodePosition.x)
         {
@@ -61,7 +62,7 @@ public class Node : IDisposable
         if (NodeInfo.position.z > node.nodeManager.maxNodePosition.z)
         {
             node.nodeManager.maxNodePosition.z = NodeInfo.position.z;
-        }
+        }*/
 
         // Network update
         if (!node.nodeManager.Networks.Contains(NodeInfo.networkID))
@@ -83,6 +84,7 @@ public class Edge : IDisposable
     public GameObject Go { get; }
 
     private EdgeRenderer edge;
+    private RelationInfo relationInfo;
     public Transform A
     {
         get { return edge.A; }
@@ -93,8 +95,11 @@ public class Edge : IDisposable
         get { return edge.A; }
         set { edge.A = value; }
     }
+    public int cid1 { get { return relationInfo.cid1; } }
+    public int cid2 { get { return relationInfo.cid2; } }
     public Edge(Transform parent,RelationInfo relationInfo)
     {
+        this.relationInfo = relationInfo;
         Go = new GameObject("EdgeRenderer");
         Go.transform.SetParent(parent);
         edge = Go.AddComponent<EdgeRenderer>();
@@ -136,6 +141,7 @@ public class NetworkVisualiser : MonoBehaviour
     public float edgeWidth;
     public Vector3 size;
     public Vector3 offset;
+    public bool relativePositioning;
     public Vector3 MinDistance
     {
         get
@@ -169,13 +175,48 @@ public class NetworkVisualiser : MonoBehaviour
     }
     public void CalculateBounds()
     {
+        if (Nodes.Count == 0)
+            return;
+        /*
         minNodePosition = Vector3.zero;
         maxNodePosition = Vector3.one;
+        */
+        minNodePosition = Nodes.First().Value.NodeInfo.position + Vector3.one;
+        maxNodePosition = Nodes.First().Value.NodeInfo.position - Vector3.one;
+        if (Nodes.Count == 1)
+            return;
         //TODO: FIX ERROR:
         // Happens when node count goes from 0 to 1
         foreach (KeyValuePair<int,Node> kvp in Nodes)
         {
             Node node = kvp.Value;
+
+            if (node.NodeInfo.position.x < minNodePosition.x)
+            {
+                minNodePosition = new Vector3(node.NodeInfo.position.x, node.NodeInfo.position.x, node.NodeInfo.position.x);
+            }
+            if (node.NodeInfo.position.y < minNodePosition.y)
+            {
+                minNodePosition = new Vector3(node.NodeInfo.position.y, node.NodeInfo.position.y, node.NodeInfo.position.y);
+            }
+            if (node.NodeInfo.position.z < minNodePosition.z)
+            {
+                minNodePosition = new Vector3(node.NodeInfo.position.z, node.NodeInfo.position.z, node.NodeInfo.position.z);
+            }
+            //max
+            if (node.NodeInfo.position.x > maxNodePosition.x)
+            {
+                maxNodePosition = new Vector3(node.NodeInfo.position.x, node.NodeInfo.position.x, node.NodeInfo.position.x);
+            }
+            if (node.NodeInfo.position.y > maxNodePosition.y)
+            {
+                maxNodePosition = new Vector3(node.NodeInfo.position.y, node.NodeInfo.position.y, node.NodeInfo.position.y);
+            }
+            if (node.NodeInfo.position.z > maxNodePosition.z)
+            {
+                maxNodePosition = new Vector3(node.NodeInfo.position.z, node.NodeInfo.position.z, node.NodeInfo.position.z);
+            }
+            /* separate minmax
             //min
             if (node.NodeInfo.position.x < minNodePosition.x)
             {
@@ -202,6 +243,7 @@ public class NetworkVisualiser : MonoBehaviour
             {
                 maxNodePosition.z = node.NodeInfo.position.z;
             }
+            */
         }
     }
     public void MatchNetwork(List<NodeInfo> nodeInfos = null)
@@ -232,6 +274,19 @@ public class NetworkVisualiser : MonoBehaviour
     {
         if(relationinfos == null)
             relationinfos = NNApi.GetRelations();
+        foreach (KeyValuePair<int, Edge> edge in Edges.ToList())
+        {
+            edge.Value.Dispose();
+        }
+        Edges.Clear();
+        foreach (KeyValuePair<int, Edge> edge in Edges.ToList())
+        {
+            if (relationinfos.FirstOrDefault(r => r.id == edge.Key) == null)
+            {
+                Edges.Remove(edge.Key);
+                edge.Value.Dispose();
+            }
+        }
         foreach (RelationInfo relationinfo in relationinfos)
         {
             if(Edges.TryGetValue(relationinfo.id, out Edge edge))
@@ -373,6 +428,24 @@ public class NetworkVisualiser : MonoBehaviour
         Vector3 maxes = new Vector3(float.MinValue, float.MinValue, float.MinValue);
         foreach (KeyValuePair<int, Node> node in Nodes)
         {
+
+            if (!node.Value.node.isGrabbed)
+            {
+                if (node.Value.NodeInfo.x_pos < mins.x)
+                    mins = node.Value.NodeInfo.position;
+                if (node.Value.NodeInfo.y_pos < mins.y)
+                    mins = node.Value.NodeInfo.position;
+                if (node.Value.NodeInfo.z_pos < mins.z)
+                    mins = node.Value.NodeInfo.position;
+
+                if (node.Value.NodeInfo.x_pos > maxes.x)
+                    maxes = node.Value.NodeInfo.position;
+                if (node.Value.NodeInfo.y_pos > maxes.y)
+                    maxes = node.Value.NodeInfo.position;
+                if (node.Value.NodeInfo.z_pos > maxes.z)
+                    maxes = node.Value.NodeInfo.position;
+            }
+            /* XYZ separate minmax
             if (!node.Value.node.isGrabbed)
             {
                 if (node.Value.NodeInfo.x_pos < mins.x)
@@ -388,7 +461,7 @@ public class NetworkVisualiser : MonoBehaviour
                     maxes.y = node.Value.NodeInfo.y_pos;
                 if (node.Value.NodeInfo.z_pos > maxes.z)
                     maxes.z = node.Value.NodeInfo.z_pos;
-            }
+            }*/
         }
         maxes *= transform.localScale.x;
         mins *= transform.localScale.x;

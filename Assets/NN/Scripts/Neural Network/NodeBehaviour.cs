@@ -31,15 +31,20 @@ public class NodeBehaviour : MonoBehaviour
     {
         if (!interactable.isSelected)
         {
-            transform.localPosition = Vector3.Lerp(
-                transform.localPosition,
-                nodeInfo.position.Map(
-                    nodeManager.minNodePosition,
-                    nodeManager.maxNodePosition,
-                nodeManager.MinDistance,
-                nodeManager.MaxDistance),
-                Time.deltaTime
-                );
+            if(nodeManager.relativePositioning)
+                transform.localPosition = Vector3.Lerp(
+                    transform.localPosition,
+                    nodeInfo.position.Map(
+                        nodeManager.minNodePosition,
+                        nodeManager.maxNodePosition,
+                        nodeManager.MinDistance,
+                        nodeManager.MaxDistance),
+                    Time.deltaTime
+                    );
+            else
+            {
+                transform.localPosition = Vector3.Lerp(transform.localPosition,nodeInfo.position,Time.deltaTime);
+            }
                 
             //transform.localPosition = (new Vector3(top.x / bottom.x, top.y / bottom.y, top.z / bottom.z) - new Vector3(0.5f, 0.5f, 0.5f)) * nodeManager.maxDistance;
         }

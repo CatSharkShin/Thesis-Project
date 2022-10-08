@@ -22,6 +22,10 @@ public class NetworkBlueprint : MonoBehaviour
     public TMP_InputField maxX;
     public TMP_InputField maxY;
     public TMP_InputField maxZ;
+
+    public TMP_InputField offsetX;
+    public TMP_InputField offsetY;
+    public TMP_InputField offsetZ;
     public void AddListener(UnityAction a)
     {
         NodeCount.onValueChanged.AddListener((float f) => a.Invoke());
@@ -34,6 +38,9 @@ public class NetworkBlueprint : MonoBehaviour
         maxX.onValueChanged.AddListener((string s) => a.Invoke());
         maxY.onValueChanged.AddListener((string s) => a.Invoke());
         maxZ.onValueChanged.AddListener((string s) => a.Invoke());
+        offsetX.onValueChanged.AddListener((string s) => a.Invoke());
+        offsetY.onValueChanged.AddListener((string s) => a.Invoke());
+        offsetZ.onValueChanged.AddListener((string s) => a.Invoke());
     }
     public bool Validate()
     {
@@ -53,6 +60,12 @@ public class NetworkBlueprint : MonoBehaviour
         if (!int.TryParse(maxY.text, out _))
             return false;
         if (!int.TryParse(maxZ.text, out _))
+            return false;
+        if (!int.TryParse(offsetX.text, out _))
+            return false;
+        if (!int.TryParse(offsetY.text, out _))
+            return false;
+        if (!int.TryParse(offsetZ.text, out _))
             return false;
 
         return true;
