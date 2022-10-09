@@ -7,12 +7,39 @@ using System;
 using System.IO;
 using System.Net;
 using Newtonsoft.Json;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Runtime.InteropServices;
 
-public class NodeInfo
+public abstract class SQLReady{
+    public abstract string Table{get;}
+    public virtual string ToSQL(){
+        Func<PropertyInfo, bool> matching =
+                property => !property.GetCustomAttributes(typeof(JsonIgnoreAttribute), false)
+                                    .Any();
+
+        List<string> COLS = new List<string>();
+        List<string> VALUES = new List<string>();
+        
+        foreach(PropertyInfo prop in this.GetType().GetProperties().Where(matching)){
+            var obj = prop.GetValue(this);
+            string val = obj == null ? " " : obj.ToString();
+            COLS.Add($"`{prop.Name}`");
+            VALUES.Add($"'{val}'");
+        }
+
+        return $"INSERT INTO `{Table}` ({string.Join(", ",COLS)}) VALUES ({string.Join(", ",VALUES)});";
+    }
+}
+
+public class NodeInfo : SQLReady
 {
+    [JsonIgnore]
+    public override string Table { get{return "networkdata";}}
     public int nodeID { get; set; }
-    public int networkID { get; set; }
     public int funcID { get; set; }
+    public int networkID { get; set; }
     public string func { get; set; }
     public float max { get; set; }
     public int act { get; set; }
@@ -33,8 +60,10 @@ public class NodeInfo
         } 
     }
 }
-public class RelationInfo
+public class RelationInfo : SQLReady
 {
+    [JsonIgnore]
+    public override string Table { get{return "relations";}}
     public int id { get; set; }
     public int cid1 { get; set; }
     public int cid2 { get; set; }
@@ -48,8 +77,8 @@ public class RelationInfo
 }
 public class NNApi
 {
-    private static readonly string url = "https://snetwork.uni-eszterhazy.hu/";
-    //private static readonly string url = "http://localhost:8000/";
+    //private static readonly string url = "https://snetwork.uni-eszterhazy.hu/";
+    private static readonly string url = "http://localhost:8000/";
     private static readonly HttpClient httpClient = new HttpClient();
     public static List<NodeInfo> GetNetwork()
     {

@@ -1151,7 +1151,7 @@ Material:
     - _MainHueShiftSpeed: 0
     - _MainHueShiftToggle: 0
     - _MainPixelMode: 0
-    - _MainTexUV: 4
+    - _MainTexUV: 0
     - _MainUseVertexColorAlpha: 0
     - _MainVertexColoring: 0
     - _MainVertexColoringEnabled: 0

@@ -167,6 +167,7 @@ public class NetworkVisualiser : MonoBehaviour
     void Start()
     {
         //StartCoroutine(useRandomGeneration());
+        Templates.Test();
         if (connectOnStart)
         {
             MatchNetwork();

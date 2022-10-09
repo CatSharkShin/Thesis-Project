@@ -2,7 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
-
+using System.Reflection;
+using System;
+using System.Linq;
 public static class Extensions
 {
     public static Vector3 Map(this Vector3 value, Vector3 fromSource, Vector3 toSource, Vector3 fromTarget, Vector3 toTarget)
@@ -23,5 +25,13 @@ public static class Extensions
     public static float Avg(this Vector3 value)
     {
         return (value.x + value.y + value.z) / 3;
+    }
+    public static IEnumerable<PropertyInfo> GetPropertiesWithoutAttribute<TType, TAttribute>()
+    {
+        Func<PropertyInfo, bool> matching =
+                property => !property.GetCustomAttributes(typeof(TAttribute), false)
+                                    .Any();
+
+        return typeof(TType).GetProperties().Where(matching);
     }
 }

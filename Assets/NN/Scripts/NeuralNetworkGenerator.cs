@@ -4,7 +4,9 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-
+using System.IO;
+using System;
+using Random = UnityEngine.Random;
 public class NeuralNetworkGenerator : MonoBehaviour
 {
     public NetworkVisualiser networkVisualizer;
@@ -45,6 +47,22 @@ public class NeuralNetworkGenerator : MonoBehaviour
     }
     void ExportSql()
     {
+        List<string> lines = new List<string>();
+        foreach(NodeInfo node in nodeInfos){
+            Debug.Log(node.ToSQL());
+            lines.Add(node.ToSQL());
+        }
+        foreach(RelationInfo relation in relationInfos){
+            Debug.Log(relation.ToSQL());
+            lines.Add(relation.ToSQL());
+        }
+        string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        StreamWriter sw = new StreamWriter(Application.dataPath+@"\SQL_OUTPUT_"+DateTime.Now.ToString().Replace(@"\",@"_").Replace(@"/",@"_").Replace(@":",@"_")+".sql");
+        foreach(string line in lines){
+            sw.Write(line);
+        }
+        sw.Close();
+
         // Call UpdateInfo
         // create sql/json and export
     }
