@@ -1,13 +1,7 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.XR.Management;
-using UnityEngine.XR;
-using Unity.XR.Oculus.Input;
 
 public class VRSwitcher : MonoBehaviour
 {
@@ -15,7 +9,7 @@ public class VRSwitcher : MonoBehaviour
     public GameObject VR;
     public GameObject PC;
     public Camera PCCamera;
-    private bool isVRMode;
+    public bool isVRMode;
     public bool IsVRMode
     {   
         get
@@ -36,16 +30,36 @@ public class VRSwitcher : MonoBehaviour
         Instance = this;
     }
     string enableVRArg = "--enable-vr";
-    public void Awake()
+    public void Start()
     {
-        StartCoroutine(StartXRCoroutine(GetArg(enableVRArg)));
+        StartCoroutine(StartXRCoroutine(isVRMode));
     }
+    IEnumerator InitXR1()
+    {
+        Debug.Log("Initializing XR...");
+        if (XRGeneralSettings.Instance.Manager.activeLoader != null)
+        {
+            Debug.Log("Deinitializing loader...");
+            XRGeneralSettings.Instance.Manager.DeinitializeLoader();
+        }
+        Debug.Log("Initializing loader...");
+        yield return XRGeneralSettings.Instance.Manager.InitializeLoader();
+        XRGeneralSettings.Instance.Manager.StartSubsystems();
+        InitVR();
+    }
+    IEnumerator InitXR2()
+    {
+        yield return XRGeneralSettings.Instance.Manager.InitializeLoader();
+        XRGeneralSettings.Instance.Manager.StartSubsystems();
+        InitVR();
+    }
+
     // This function checks out startup arguments to see if we want VR
     // To do this, create a desktop shortcut and add the arg at the end.
     // Example: "C:\Path\To\Game.exe" --enable-vr
     private static bool GetArg(string name)
     {
-        return Instance.IsVRMode;
+        return Instance.isVRMode;
         var args = System.Environment.GetCommandLineArgs();
         for (int i = 0; i < args.Length; i++)
         {
@@ -59,14 +73,21 @@ public class VRSwitcher : MonoBehaviour
     }
     public IEnumerator StartXRCoroutine(bool enableVR)
     {
-
         // Only run the code block when we want VR
         Debug.Log("Looking if VR should enable");
         if (enableVR)
         {
             Debug.Log("Initializing XR...");
-            yield return XRGeneralSettings.Instance.Manager.InitializeLoader();
+            yield return null;
+            //XRGeneralSettings.Instance.Manager.StartSubsystems();
 
+            if (XRGeneralSettings.Instance.Manager.activeLoader != null)
+            {
+                XRGeneralSettings.Instance.Manager.StopSubsystems();
+                XRGeneralSettings.Instance.Manager.DeinitializeLoader();
+            }
+            yield return XRGeneralSettings.Instance.Manager.InitializeLoader();
+            
             if (XRGeneralSettings.Instance.Manager.activeLoader == null)
             {
                 Debug.LogError("Initializing XR Failed. Check Editor or Player log for details.");
@@ -74,15 +95,15 @@ public class VRSwitcher : MonoBehaviour
             else
             {
                 XRGeneralSettings.Instance.Manager.StartSubsystems();
-                Debug.Log("Starting XR...");
                 InitVR();
+                Debug.Log("Starting XR...");
             }
         }
         else
         {
+            InitPC();
             XRGeneralSettings.Instance.Manager.StopSubsystems();
             XRGeneralSettings.Instance.Manager.DeinitializeLoader();
-            InitPC();
             Debug.Log("Did not find VR arg, starting in 2D");
         }
     }
@@ -92,6 +113,7 @@ public class VRSwitcher : MonoBehaviour
     {
         Instance.VR.SetActive(true);
         Instance.PC.SetActive(false);
+        Camera.SetupCurrent(Instance.VR.GetComponentInChildren<Camera>());
         /*
         XRSettings.enabled = true;*/
     }
@@ -99,6 +121,7 @@ public class VRSwitcher : MonoBehaviour
     {
         Instance.VR.SetActive(false);
         Instance.PC.SetActive(true);
+        Camera.SetupCurrent(Instance.PC.GetComponentInChildren<Camera>());
         /*
         XRDevice.DisableAutoXRCameraTracking(Instance.PCCamera,true);
         XRDevice.fovZoomFactor = 0.1f;

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.Networking.Types;
 using UnityEngine.UIElements;
@@ -33,6 +34,13 @@ public class Node : IDisposable
         Go.transform.localScale = Vector3.zero;
         UpdateNodeManager();
         node.nodeManager.CalculateBounds();
+    }
+    public bool isGrabbed 
+    {
+        get
+        {
+            return node.isGrabbed;
+        }
     }
     public void UpdateNodeManager()
     {
@@ -83,8 +91,17 @@ public class Edge : IDisposable
 {
     public GameObject Go { get; }
 
-    private EdgeRenderer edge;
+    public EdgeRenderer edge;
     private RelationInfo relationInfo;
+    public RelationInfo RelationInfo
+    {
+        get { return edge.relationInfo; }
+        set
+        {
+            edge.relationInfo = value;
+            edge.nodeManager.CalculateBounds();
+        }
+    }
     public Transform A
     {
         get { return edge.A; }
@@ -103,6 +120,7 @@ public class Edge : IDisposable
         Go = new GameObject("EdgeRenderer");
         Go.transform.SetParent(parent);
         edge = Go.AddComponent<EdgeRenderer>();
+        edge.relationInfo = relationInfo;
         edge.nodeManager = parent.GetComponent<NetworkVisualiser>();
         edge.A = edge.nodeManager.Nodes[relationInfo.cid1].Go.transform;
         edge.B = edge.nodeManager.Nodes[relationInfo.cid2].Go.transform;
@@ -137,8 +155,9 @@ public class NetworkVisualiser : MonoBehaviour
     public int maxNodes;
     public int maxEdges;
     public float update;
-    public float nodeSize;
+    public float _nodeSize;
     public float edgeWidth;
+    public float edgeLabelSize;
     public Vector3 size;
     public Vector3 offset;
     public bool relativePositioning;
@@ -497,6 +516,22 @@ public class NetworkVisualiser : MonoBehaviour
             sizing = true;
         }*/
         if(Nodes.Count > 0)
-            nodeSize = ((size.Avg()) / (Nodes.Count)) * (1/transform.localScale.Avg());
+            _nodeSize = ((size.Avg()) / (Nodes.Count)) * (1/transform.localScale.Avg());
+    }
+    public List<Node> GetLeftNodes(int forId)
+    {
+        return Edges.Where(edge => edge.Value.RelationInfo.cid2 == forId).Select(edge => Nodes[edge.Value.cid1]).ToList();
+    }
+    public List<Node> GetRightNodes(int forId)
+    {
+        return Edges.Where(edge => edge.Value.RelationInfo.cid1 == forId).Select(edge => Nodes[edge.Value.cid2]).ToList();
+    }
+    public List<Edge> GetLeftEdges(int forId)
+    {
+        return Edges.Where(edge => edge.Value.RelationInfo.cid2 == forId).Select(edge => edge.Value).ToList();
+    }
+    public List<Edge> GetRightEdges(int forId)
+    {
+        return Edges.Where(edge => edge.Value.RelationInfo.cid1 == forId).Select(edge => edge.Value).ToList();
     }
 }

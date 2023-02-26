@@ -10,12 +10,10 @@ Material:
   m_Name: Neuron
   m_Shader: {fileID: 4800000, guid: 9cdbe9241ea4aaa48944028272700834, type: 3}
   m_ValidKeywords:
-  - COLOR_GRADING_HDR
-  - POI_LIGHT_DATA_ADDITIVE_DIRECTIONAL_ENABLE
   - POI_LIGHT_DATA_ADDITIVE_ENABLE
   - POI_VERTEXLIGHT_ON
   - VIGNETTE_MASKED
-  - _LIGHTINGMODE_FLAT
+  - _LIGHTINGMODE_REALISTIC
   - _RIMSTYLE_POIYOMI
   m_InvalidKeywords: []
   m_LightmapFlags: 2
@@ -788,7 +786,7 @@ Material:
     - _DetailTexIntensity: 1
     - _DetailTexUV: 0
     - _DetailTintThemeIndex: 0
-    - _DisableDirectionalInAdd: 1
+    - _DisableDirectionalInAdd: 0
     - _DissolveAlpha: 0
     - _DissolveAlpha0: 0
     - _DissolveAlpha1: 0
@@ -909,7 +907,7 @@ Material:
     - _EmissionScrollingVertexColor1: 0
     - _EmissionScrollingVertexColor2: 0
     - _EmissionScrollingVertexColor3: 0
-    - _EmissionStrength: 0
+    - _EmissionStrength: 0.2
     - _EmissionStrength1: 0
     - _EmissionStrength2: 0
     - _EmissionStrength3: 0
@@ -1105,7 +1103,7 @@ Material:
     - _LightingAdditiveLimited: 0
     - _LightingAdditiveMonochromatic: 0
     - _LightingAdditivePassthrough: 0.5
-    - _LightingAdditiveType: 1
+    - _LightingAdditiveType: 0
     - _LightingCap: 1
     - _LightingCapEnabled: 1
     - _LightingCastedShadows: 0
@@ -1124,8 +1122,8 @@ Material:
     - _LightingIgnoreAmbientColor: 1
     - _LightingIndirectUsesNormals: 0
     - _LightingMapMode: 0
-    - _LightingMinLightBrightness: 0
-    - _LightingMode: 5
+    - _LightingMinLightBrightness: 0.05
+    - _LightingMode: 6
     - _LightingMonochromatic: 0
     - _LightingMulitlayerNonLinear: 1
     - _LightingShadowMaskStrengthA: 0
@@ -1141,9 +1139,9 @@ Material:
     - _LockTooltip: 0
     - _MainALHueShiftBand: 0
     - _MainALHueShiftCTIndex: 0
-    - _MainBrightness: -0.001
+    - _MainBrightness: 0
     - _MainColorAdjustTextureUV: 0
-    - _MainColorAdjustToggle: 1
+    - _MainColorAdjustToggle: 0
     - _MainHueALCTEnabled: 0
     - _MainHueALMotionSpeed: 1
     - _MainHueShift: 0
@@ -1284,7 +1282,7 @@ Material:
     - _OutlineClipAtZeroWidth: 0
     - _OutlineCull: 1
     - _OutlineDstBlend: 0
-    - _OutlineEmission: 0
+    - _OutlineEmission: 0.5
     - _OutlineExpansionMode: 1
     - _OutlineFixedSize: 0
     - _OutlineHueOffset: 0
@@ -1404,7 +1402,7 @@ Material:
     - _RgbNormalsEnabled: 0
     - _RimApColorThemeIndex: 0
     - _RimBaseColorMix: 0
-    - _RimBlendMode: 0
+    - _RimBlendMode: 1
     - _RimBlendStrength: 1
     - _RimBrightness: 1
     - _RimEnviroBlur: 0.7
@@ -1592,7 +1590,7 @@ Material:
     - footer_patreon: 0
     - footer_twitter: 0
     - footer_youtube: 0
-    - m_AudioLinkCategory: 1
+    - m_AudioLinkCategory: 0
     - m_OutlineCategory: 1
     - m_end_ALDecalSpectrum: 0
     - m_end_Alpha: 0
@@ -1670,9 +1668,9 @@ Material:
     - m_end_uvPanosphere: 0
     - m_end_uvPolar: 0
     - m_end_vertexManipulation: 0
-    - m_lightingCategory: 0
+    - m_lightingCategory: 1
     - m_mainCategory: 1
-    - m_modifierCategory: 1
+    - m_modifierCategory: 0
     - m_postprocessing: 1
     - m_renderingCategory: 1
     - m_specialFXCategory: 1
@@ -1697,7 +1695,7 @@ Material:
     - m_start_GlobalThemes: 0
     - m_start_Iridescence: 0
     - m_start_IridescenceAudioLink: 0
-    - m_start_MainHueShift: 1
+    - m_start_MainHueShift: 0
     - m_start_MainVertexColors: 0
     - m_start_Matcap2: 0
     - m_start_Matcap3: 0
@@ -1706,7 +1704,7 @@ Material:
     - m_start_OutlineStencil: 0
     - m_start_PathAudioLink: 0
     - m_start_PoiLightData: 1
-    - m_start_PoiShading: 0
+    - m_start_PoiShading: 1
     - m_start_RGBMask: 0
     - m_start_RimAudioLink: 0
     - m_start_StencilPassBackOptions: 0
@@ -1738,7 +1736,7 @@ Material:
     - m_start_glitter: 0
     - m_start_matcap: 0
     - m_start_mirrorOptions: 0
-    - m_start_outlineAdvanced: 0
+    - m_start_outlineAdvanced: 1
     - m_start_outlineBlending: 0
     - m_start_parallax: 0
     - m_start_pathing: 0
@@ -1996,7 +1994,7 @@ Material:
     - _RgbNormalGPan: {r: 0, g: 0, b: 0, a: 0}
     - _RgbNormalRPan: {r: 0, g: 0, b: 0, a: 0}
     - _RimEnviroMaskPan: {r: 0, g: 0, b: 0, a: 0}
-    - _RimLightColor: {r: 1, g: 1, b: 1, a: 1}
+    - _RimLightColor: {r: 0.33962262, g: 0.33962262, b: 0.33962262, a: 1}
     - _RimMaskPan: {r: 0, g: 0, b: 0, a: 0}
     - _RimShadowAlpha: {r: 0, g: 0, b: 0, a: 1}
     - _RimTexPan: {r: 0, g: 0, b: 0, a: 0}

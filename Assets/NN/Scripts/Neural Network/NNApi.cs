@@ -42,7 +42,7 @@ public class NodeInfo : SQLReady
     public int networkID { get; set; }
     public string func { get; set; }
     public float max { get; set; }
-    public int act { get; set; }
+    public float act { get; set; }
     public float x_pos { get; set; }
     public float y_pos { get; set; }
     public float z_pos { get; set; }
@@ -59,6 +59,22 @@ public class NodeInfo : SQLReady
 
         } 
     }
+    public NodeInfo(){
+
+    }
+    public NodeInfo(int nodeID,int networkID=0,float x_pos =0,float y_pos=0,float z_pos = 0,
+    int funcID=0,string func="",float max=0, float act=0,string model =""){
+        this.nodeID = nodeID;
+        this.networkID = networkID;
+        this.x_pos = x_pos;
+        this.y_pos = y_pos;
+        this.z_pos = z_pos;
+        this.funcID = funcID;
+        this.func = func;
+        this.max = max;
+        this.act = act;
+        this.model = model;
+    }
 }
 public class RelationInfo : SQLReady
 {
@@ -74,6 +90,15 @@ public class RelationInfo : SQLReady
     public int x_pos2 { get; set; }
     public int y_pos2 { get; set; }
     public int z_pos2 { get; set; }
+    public RelationInfo(){}
+    public RelationInfo(int id,int cid1, int cid2,
+    string label = "")
+    {
+        this.cid1 = cid1;
+        this.cid2 = cid2;
+        this.id = id;
+        this.label = label;
+    }
 }
 public class NNApi
 {

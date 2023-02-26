@@ -5,13 +5,33 @@ using UnityEngine;
 using System.Reflection;
 using System;
 using System.Linq;
+using System.Drawing;
+using Color = UnityEngine.Color;
+
 public static class Extensions
 {
+    public static string Lerp(this string from, string to,float t)
+    {
+        if (t > 0.99)
+            return to;
+        if (to.Length < from.Length)
+            to = to.PadRight(from.Length);
+        else
+            from = from.PadRight(to.Length);
+        int border = (int)(to.Length * t);
+        string first = to.Substring(0, border);
+        string second = from.Substring(border);
+        string result = first + second;
+        return result;
+    }
+    public static bool Equals2(this Color color1,Color color2)
+    {
+        return (((int)(color1.r * 1000) == (int)(color2.r * 1000)) && ((int)(color1.b * 1000) == (int)(color2.b * 1000)) && ((int)(color1.g * 1000) == (int)(color2.g * 1000)));
+    }
     public static Vector3 Map(this Vector3 value, Vector3 fromSource, Vector3 toSource, Vector3 fromTarget, Vector3 toTarget)
     {
         var divtop = (value - fromSource);
         var divbottom = (toSource - fromSource);
-
         var mulA = new Vector3(divtop.x / divbottom.x, divtop.y / divbottom.y, divtop.z / divbottom.z);
         var mulB = (toTarget - fromTarget);
 
@@ -33,5 +53,26 @@ public static class Extensions
                                     .Any();
 
         return typeof(TType).GetProperties().Where(matching);
+    }
+    public static TType GetParentComponent<TType>(this Transform transform)
+    {
+        if (transform == null)
+            return default(TType);
+        if (transform.parent.GetComponent<TType>() == null)
+            return transform.parent.GetParentComponent<TType>();
+        else
+            return transform.parent.GetComponent<TType>();
+    }
+    public static Quaternion LinePerpendicular(Vector3 p0,Vector3 p1)
+    {
+        Vector3 directionVector = p1 - p0;
+        bool LeftToRight = Camera.main.WorldToScreenPoint(p0).x < Camera.main.WorldToScreenPoint(p1).x;
+        Vector3 from = Vector3.right;
+        if (!LeftToRight)
+        {
+            directionVector = -directionVector;
+        }
+        Quaternion rotate = Quaternion.FromToRotation(from, directionVector.normalized);
+        return rotate;
     }
 }
