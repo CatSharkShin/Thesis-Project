@@ -1,23 +1,25 @@
 using Decorators;
 using NetworkAnimations;
+using NeuralNetwork;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Networking.Types;
-
+using NeuralNetwork;
+using Edge = NeuralNetwork.Edge;
 public class BackpropAnimator : AnimatorController
 {
-    public NetworkVisualiser nw;
+    public Visualizer nw;
     public TextMeshPro title;
     public override void Initialize()
     {
         InitializeNetwork();
         TextChanger tc = new TextChanger(title, "Forward propagation", "Backpropagation");
         animators.Add(new ShowAnimator(1f));
-        AddAnimatable(NodeValueDecorator.Create(nw.Nodes[0], nw.Nodes[0].NodeInfo.act));
-        AddAnimatable(NodeValueDecorator.Create(nw.Nodes[1], nw.Nodes[1].NodeInfo.act));
+        AddAnimatable(NodeValueDecorator.Create(nw.Nodes[0], nw.Nodes[0].nodeInfo.act));
+        AddAnimatable(NodeValueDecorator.Create(nw.Nodes[1], nw.Nodes[1].nodeInfo.act));
         AddAnimatable(WeightDecorator.Create(nw.Edges[0]));
         AddAnimatable(WeightDecorator.Create(nw.Edges[1]));
         AddAnimatable(WeightDecorator.Create(nw.Edges[2]));
@@ -35,7 +37,7 @@ public class BackpropAnimator : AnimatorController
         AddAnimatable(firstValDec.animatables[0]);
         AddAnimatable(firstValDec.animatables[1]);
         animators.Add(new ShowAnimator(1f));
-        AddAnimatable(NodeValueDecorator.Create(nw.Nodes[2], nw.Nodes[2].NodeInfo.act));
+        AddAnimatable(NodeValueDecorator.Create(nw.Nodes[2], nw.Nodes[2].nodeInfo.act));
 
         //DELAY
         animators.Add(new ShowAnimator(7f));
@@ -44,7 +46,7 @@ public class BackpropAnimator : AnimatorController
         AddAnimatable(firstValDec.animatables[2]);
         AddAnimatable(firstValDec.animatables[3]);
         animators.Add(new ShowAnimator(1f));
-        AddAnimatable(NodeValueDecorator.Create(nw.Nodes[3], nw.Nodes[3].NodeInfo.act));
+        AddAnimatable(NodeValueDecorator.Create(nw.Nodes[3], nw.Nodes[3].nodeInfo.act));
 
         ShowAnimator valDec = new ShowAnimator(1f);
         animators.Add(valDec);
@@ -54,7 +56,7 @@ public class BackpropAnimator : AnimatorController
         animators.Add(new AnimateAnimator(2f, valDec.animatables));
 
         animators.Add(new ShowAnimator(1f));
-        AddAnimatable(NodeValueDecorator.Create(nw.Nodes[4], nw.Nodes[4].NodeInfo.act));
+        AddAnimatable(NodeValueDecorator.Create(nw.Nodes[4], nw.Nodes[4].nodeInfo.act));
 
         //DELAY
         animators.Add(new ShowAnimator(11f));
@@ -127,7 +129,7 @@ public class BackpropAnimator : AnimatorController
             //Output
             new NodeInfo(4,2, 4,-0.5f,0,  0, "", 0, 0.2899f),
         };
-        nw.MatchNetwork(new List<NodeInfo>(n));
+        nw.MatchNodes(new List<NodeInfo>(n));
 
         HiddenLayerDecorator.Create(nw.Nodes[2], Relu, ReluString);
         HiddenLayerDecorator.Create(nw.Nodes[3], Relu, ReluString);
@@ -135,30 +137,30 @@ public class BackpropAnimator : AnimatorController
 
         Vector3 offset = new Vector3(0, 0.15f, 0);
         float size = 3f;
-        HintVisual.Create(nw.Nodes[0].Go.transform, "Input Neuron", offset, size);
-        HintVisual.Create(nw.Nodes[1].Go.transform, "Input Neuron", offset, size);
+        HintVisual.Create(nw.Nodes[0].transform, "Input Neuron", offset, size);
+        HintVisual.Create(nw.Nodes[1].transform, "Input Neuron", offset, size);
 
-        HintVisual.Create(nw.Nodes[2].Go.transform, "Hidden Neuron", offset, size);
-        HintVisual.Create(nw.Nodes[3].Go.transform, "Hidden Neuron", offset, size);
+        HintVisual.Create(nw.Nodes[2].transform, "Hidden Neuron", offset, size);
+        HintVisual.Create(nw.Nodes[3].transform, "Hidden Neuron", offset, size);
 
-        HintVisual.Create(nw.Nodes[4].Go.transform, "Output Neuron", offset, size);
+        HintVisual.Create(nw.Nodes[4].transform, "Output Neuron", offset, size);
 
         //nw.Nodes[4].node.gameObject.GetNamedChild("Neuron Data").GetComponent<NeuronDataDisplayer>().calculationText =
         //    "0.1*0.3\r\n+\r\n0.13*0.5\r\n+\r\n=0.03+0.065 = 0.095";
 
-        RelationInfo[] r = new RelationInfo[]{
+        EdgeInfo[] r = new EdgeInfo[]{
             // IN -> H
-            new RelationInfo(0,0,2,"0.12"),
-            new RelationInfo(1,1,2,"0.22"),
+            new EdgeInfo(0,0,2,"0.12"),
+            new EdgeInfo(1,1,2,"0.22"),
 
-            new RelationInfo(2,0,3,"0.21"),
-            new RelationInfo(3,1,3,"0.6"),
+            new EdgeInfo(2,0,3,"0.21"),
+            new EdgeInfo(3,1,3,"0.6"),
 
             // H -> O
-            new RelationInfo(4,2,4,"0.14"),
-            new RelationInfo(5,3,4,"0.15"),
+            new EdgeInfo(4,2,4,"0.14"),
+            new EdgeInfo(5,3,4,"0.15"),
         };
-        nw.MatchRelations(new List<RelationInfo>(r));
+        nw.MatchEdges(new List<EdgeInfo>(r));
     }
     float Relu(float x)
     {

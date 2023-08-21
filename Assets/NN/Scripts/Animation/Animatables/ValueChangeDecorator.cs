@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using NeuralNetwork;
 public class ValueChangeDecorator : MonoBehaviour, IAnimatable
 {
     public Node node;
@@ -11,7 +11,7 @@ public class ValueChangeDecorator : MonoBehaviour, IAnimatable
 
     public void Animate(float t)
     {
-        node.NodeInfo.act = Mathf.Lerp(from, changeTo, t);
+        node.nodeInfo.act = Mathf.Lerp(from, changeTo, t);
     }
 
     public void Show(float t)
@@ -22,9 +22,9 @@ public class ValueChangeDecorator : MonoBehaviour, IAnimatable
     public static ValueChangeDecorator Create(Node node, float changeTo)
     {
         GameObject go = new GameObject("WeightChangeDecorator");
-        go.transform.SetParent(node.Go.transform);
+        go.transform.SetParent(node.transform);
         ValueChangeDecorator vcd = go.AddComponent<ValueChangeDecorator>();
-        vcd.from = node.NodeInfo.act;
+        vcd.from = node.nodeInfo.act;
         vcd.node = node;
         vcd.changeTo = changeTo;
         return vcd;

@@ -7,16 +7,17 @@ using UnityEngine.UI;
 using System.IO;
 using System;
 using Random = UnityEngine.Random;
+using NeuralNetwork;
 public class NeuralNetworkGenerator : MonoBehaviour
 {
-    public NetworkVisualiser networkVisualizer;
+    public Visualizer networkVisualizer;
     public Button addNetwork;
     public Button exportSQL;
     public Transform networksParent;
 
     public List<NetworkBlueprint> networkBlueprints;
 
-    public List<RelationInfo> relationInfos = new List<RelationInfo>();
+    public List<EdgeInfo> edgeInfos = new List<EdgeInfo>();
     public List<NodeInfo> nodeInfos = new List<NodeInfo>();
 
     public int seed;
@@ -52,9 +53,9 @@ public class NeuralNetworkGenerator : MonoBehaviour
             Debug.Log(node.ToSQL());
             lines.Add(node.ToSQL());
         }
-        foreach(RelationInfo relation in relationInfos){
-            Debug.Log(relation.ToSQL());
-            lines.Add(relation.ToSQL());
+        foreach(EdgeInfo edge in edgeInfos){
+            Debug.Log(edge.ToSQL());
+            lines.Add(edge.ToSQL());
         }
         string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         StreamWriter sw = new StreamWriter(Application.dataPath+@"\SQL_OUTPUT_"+DateTime.Now.ToString().Replace(@"\",@"_").Replace(@"/",@"_").Replace(@":",@"_")+".sql");
@@ -71,10 +72,10 @@ public class NeuralNetworkGenerator : MonoBehaviour
         Random.InitState(seed);
         // Clear NodeInfos
         nodeInfos.Clear();
-        relationInfos.Clear();
+        edgeInfos.Clear();
         // Iterate thru network blueprints
         int nodeid = 0;
-        int relationid = 0;
+        int edgeid = 0;
         foreach (NetworkBlueprint network in networkBlueprints)
         {
             Vector3 min = new Vector3((float)int.Parse(network.minX.text), (float)int.Parse(network.minY.text), (float)int.Parse(network.minZ.text));
@@ -102,28 +103,6 @@ public class NeuralNetworkGenerator : MonoBehaviour
                 currentNodes.Add(newNI);
                 nodeid++;
             }
-            /*
-                 
-            foreach (NodeInfo nodeInfo in currentNodes)
-            {
-                for (int i = 0; i < network.RelationCount.value; i++)
-                {
-                    int cid2;
-                    do
-                    {
-                        cid2 = currentNodes[Random.Range(0, currentNodes.Count)].nodeID;
-                    } while (cid2 == nodeInfo.nodeID);
-
-                    RelationInfo newRelationInfo = new RelationInfo();
-                    newRelationInfo.id = relationid;
-                    newRelationInfo.cid1 = nodeInfo.nodeID;
-                    newRelationInfo.cid2 = cid2;
-                    relationInfos.Add(newRelationInfo);
-                    relationid++;
-                }
-            }
-                */
-
         }
         foreach (NetworkBlueprint network in networkBlueprints)
         {
@@ -132,7 +111,7 @@ public class NeuralNetworkGenerator : MonoBehaviour
             List<NodeInfo> currentNodes = nodeInfos.Where(n => n.networkID == int.Parse(network.NetworkID.text)).ToList();
             foreach (NodeInfo nodeInfo in currentNodes)
             {
-                for (int i = 0; i < network.RelationCount.value; i++)
+                for (int i = 0; i < network.EdgeCount.value; i++)
                 {
                     int cid2;
                     do
@@ -140,12 +119,12 @@ public class NeuralNetworkGenerator : MonoBehaviour
                         cid2 = currentNodes[Random.Range(0, currentNodes.Count)].nodeID;
                     } while (cid2 == nodeInfo.nodeID);
 
-                    RelationInfo newRelationInfo = new RelationInfo();
-                    newRelationInfo.id = relationid;
-                    newRelationInfo.cid1 = nodeInfo.nodeID;
-                    newRelationInfo.cid2 = cid2;
-                    relationInfos.Add(newRelationInfo);
-                    relationid++;
+                    EdgeInfo newEdgeInfo = new EdgeInfo();
+                    newEdgeInfo.id = edgeid;
+                    newEdgeInfo.cid1 = nodeInfo.nodeID;
+                    newEdgeInfo.cid2 = cid2;
+                    edgeInfos.Add(newEdgeInfo);
+                    edgeid++;
                 }
             }
         }
@@ -164,8 +143,8 @@ public class NeuralNetworkGenerator : MonoBehaviour
         if (NetworksValid())
         {
             UpdateInfo();
-            networkVisualizer.MatchNetwork(nodeInfos);
-            networkVisualizer.MatchRelations(relationInfos);
+            networkVisualizer.MatchNodes(nodeInfos);
+            networkVisualizer.MatchEdges(edgeInfos);
         }
     }
 }

@@ -1,6 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using TMPro;
+using UnityEditor.MemoryProfiler;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -11,7 +15,7 @@ public class NetworkBlueprint : MonoBehaviour
     public Button delete;
     public TextMeshProUGUI NetworkID;
     public Slider NodeCount;
-    public Slider RelationCount;
+    public Slider EdgeCount;
     public Toggle Spherical;
     public TMP_InputField radius;
 
@@ -29,7 +33,7 @@ public class NetworkBlueprint : MonoBehaviour
     public void AddListener(UnityAction a)
     {
         NodeCount.onValueChanged.AddListener((float f) => a.Invoke());
-        RelationCount.onValueChanged.AddListener((float f) => a.Invoke());
+        EdgeCount.onValueChanged.AddListener((float f) => a.Invoke());
         Spherical.onValueChanged.AddListener((bool b) => a.Invoke());
         radius.onValueChanged.AddListener((string s) => a.Invoke());
         minX.onValueChanged.AddListener((string s) => a.Invoke());
@@ -48,7 +52,6 @@ public class NetworkBlueprint : MonoBehaviour
             return false;
         if (!int.TryParse(radius.text, out _))
             return false;
-
         if (!int.TryParse(minX.text, out _))
             return false;
         if (!int.TryParse(minY.text, out _))
@@ -67,7 +70,6 @@ public class NetworkBlueprint : MonoBehaviour
             return false;
         if (!int.TryParse(offsetZ.text, out _))
             return false;
-
         return true;
     }
     private void Start()

@@ -9,6 +9,8 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using static UnityEngine.GraphicsBuffer;
+using NeuralNetwork;
+using Edge = NeuralNetwork.Edge;
 
 namespace Decorators
 {
@@ -25,7 +27,7 @@ namespace Decorators
         private void Update()
         {
             TextMeshProUGUI tmp = transform.GetChild(0).GetChild(0).Find("weights").GetComponent<TextMeshProUGUI>();
-            List<string> edges = node.node.nodeManager.GetLeftEdges(node.id).Select(edge => edge.RelationInfo.label).ToList();
+            List<string> edges = node.networkVisualiser.GetLeftEdges(node.nodeInfo.nodeID).Select(edge => edge.edgeInfo.label).ToList();
             tmp.text = String.Join(",",edges);
         }
         IEnumerator Initialize()
@@ -48,7 +50,7 @@ namespace Decorators
             TextMeshProUGUI tmp = transform.GetChild(0).GetChild(0).Find("calculation").GetComponent<TextMeshProUGUI>();
             tmp.text = "";
             float result = nodeFunction.Invoke(Weigthed()); // 0.67
-            string calculationText = functionString.Invoke(node.NodeInfo.act); // relu(5)
+            string calculationText = functionString.Invoke(node.nodeInfo.act); // relu(5)
             string weightingText = WeightingString();
             weightingText += " = " + Weigthed() + "\n";
             weightingText += calculationText;// + " = " + result;
@@ -63,25 +65,25 @@ namespace Decorators
         }
         private string WeightingString()
         {
-            NetworkVisualiser nm = node.node.nodeManager;
-            List<Edge> edges = nm.GetLeftEdges(node.id);
+            Visualizer nw = node.networkVisualiser;
+            List<Edge> edges = nw.GetLeftEdges(node.nodeInfo.nodeID);
             List<string> lines = new List<string>();
             foreach(Edge edge in edges)
             {
-                lines.Add(edge.RelationInfo.label + " * " + nm.Nodes[edge.cid1].NodeInfo.act);
+                lines.Add(edge.edgeInfo.label + " * " + nw.Nodes[edge.edgeInfo.cid1].nodeInfo.act);
             }
 
             return string.Join(" + ",lines);
         }
         private float Weigthed()
         {
-            NetworkVisualiser nm = node.node.nodeManager;
-            List<Edge> edges = nm.GetLeftEdges(node.id);
+            Visualizer nm = node.networkVisualiser;
+            List<Edge> edges = nm.GetLeftEdges(node.nodeInfo.nodeID);
 
             float result = 0;
             foreach (Edge edge in edges)
             {
-                result += float.Parse(edge.RelationInfo.label) * nm.Nodes[edge.cid1].NodeInfo.act;
+                result += float.Parse(edge.edgeInfo.label) * nm.Nodes[edge.edgeInfo.cid1].nodeInfo.act;
             }
 
             return result;
@@ -113,13 +115,13 @@ namespace Decorators
         public static HiddenLayerDecorator Create(Node node, Func<float, float> func,Func<float,string> funcstring)
         {
             GameObject Go = Instantiate(Resources.Load<GameObject>("Prefabs/Decorators/Hidden Decorator"));
-            Go.transform.SetParent(node.Go.transform);
+            Go.transform.SetParent(node.transform);
             Go.transform.localScale = new Vector3(1, 1, 1);
             HiddenLayerDecorator hld = Go.GetComponent<HiddenLayerDecorator>();
             hld.nodeFunction = func;
             hld.functionString = funcstring;
             hld.node = node;
-            XRGrabInteractable grabbable = node.Go.GetComponent<XRGrabInteractable>();
+            XRGrabInteractable grabbable = node.gameObject.GetComponent<XRGrabInteractable>();
             hld.grabbable = grabbable;
             ScaleOnGrab.Create(Go.transform.GetChild(0).gameObject, Vector3.zero, Vector3.one, grabbable);
             return hld;

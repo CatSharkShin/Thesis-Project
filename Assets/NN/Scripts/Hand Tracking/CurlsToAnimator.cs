@@ -8,6 +8,8 @@ public class CurlsToAnimator : MonoBehaviour
     Hey Martin, Im Martin
     If you see this, please just use the HandGetter and create your own script
     instead of plugging the values into the animator thru this script
+    Hey Martin, Im Martin
+    No, not rn.
     */
     public HandGetter handGetter;
     public Animator animator;

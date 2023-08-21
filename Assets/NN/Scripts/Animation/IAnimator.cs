@@ -12,10 +12,6 @@ namespace NetworkAnimations
         {
             Initialize();    
         }
-        private void Update()
-        {
-
-        }
         IEnumerator CorAnimate() {
             foreach (Animator animator in animators)
             {

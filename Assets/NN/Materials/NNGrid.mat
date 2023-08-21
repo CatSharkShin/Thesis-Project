@@ -898,7 +898,7 @@ Material:
     - _EmissionScrollingVertexColor1: 0
     - _EmissionScrollingVertexColor2: 0
     - _EmissionScrollingVertexColor3: 0
-    - _EmissionStrength: 3
+    - _EmissionStrength: 5
     - _EmissionStrength1: 0
     - _EmissionStrength2: 0
     - _EmissionStrength3: 0
@@ -1391,7 +1391,7 @@ Material:
     - _SDFShadingTextureUV: 0
     - _SSIgnoreCastedShadows: 0
     - _Saturation: 0
-    - _ScrollingEmission: 1
+    - _ScrollingEmission: 0
     - _ScrollingEmission1: 0
     - _ScrollingEmission2: 0
     - _ScrollingEmission3: 0

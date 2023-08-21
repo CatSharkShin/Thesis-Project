@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-
+using NeuralNetwork;
 public class NodeMenu : MonoBehaviour
 {
-    public NodeBehaviour node;
+    public Node node;
     public TextMeshProUGUI ID;
     public TextMeshProUGUI Network;
     public TextMeshProUGUI Func;
@@ -15,11 +15,11 @@ public class NodeMenu : MonoBehaviour
     }
     void Update()
     {
-        if(node.NodeInfo != null)
+        if(node.nodeInfo != null)
         {
-            ID.text = node.NodeInfo.nodeID.ToString();
-            Network.text = node.NodeInfo.networkID.ToString();
-            Func.text = node.NodeInfo.func;
+            ID.text = node.nodeInfo.nodeID.ToString();
+            Network.text = node.nodeInfo.networkID.ToString();
+            Func.text = node.nodeInfo.func;
         }
     }
 }

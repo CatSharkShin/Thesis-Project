@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-
+using NeuralNetwork;
 public class EdgeDecoration : IAnimatable
 {
     private string name;
@@ -16,14 +16,14 @@ public class EdgeDecoration : IAnimatable
     TextMeshPro valueLabel;
     public EdgeDecoration(Edge edge)
     {
-        this.name = $"Edge {edge.edge.relationInfo.id}";
+        this.name = $"Edge {edge.edgeInfo.id}";
         this.edge = edge;
 
-        this.from = edge.edge.nodeManager.Nodes[edge.cid1].NodeInfo.act;
-        this.to = edge.edge.nodeManager.Nodes[edge.cid1].NodeInfo.act*float.Parse(edge.edge.relationInfo.label);
+        this.from = edge.networkVisualizer.Nodes[edge.edgeInfo.cid1].nodeInfo.act;
+        this.to = edge.networkVisualizer.Nodes[edge.edgeInfo.cid1].nodeInfo.act*float.Parse(edge.edgeInfo.label);
 
         InitializeLabels();
-        weightLabel.text = edge.edge.relationInfo.label;
+        weightLabel.text = edge.edgeInfo.label;
         valueLabel.text = this.from.ToString("0.000");
 
         weightLabel.transform.localScale = new Vector3(0, 0, 0);
@@ -31,14 +31,14 @@ public class EdgeDecoration : IAnimatable
     }
     public void Animate(float t)
     {
-        NetworkVisualiser nodeManager = edge.edge.nodeManager;
-        LineRenderer lineRenderer = edge.edge.lineRenderer;
+        Visualizer nw = edge.networkVisualizer;
+        LineRenderer lineRenderer = edge.lineRenderer;
 
         valueLabel.text = Mathf.Lerp(from, to, t).ToString("0.000");
-        weightLabel.fontSize = nodeManager.edgeLabelSize * nodeManager._nodeSize;
-        valueLabel.fontSize = nodeManager.edgeLabelSize * nodeManager._nodeSize;
-        weightLabel.margin = new Vector4(0, 0, 0, nodeManager.edgeLabelSize * nodeManager._nodeSize * 0.2f);
-        valueLabel.margin = new Vector4(0, 0, 0, nodeManager.edgeLabelSize * nodeManager._nodeSize * 0.2f);
+        weightLabel.fontSize = nw.edgeLabelSize * nw.NodeSize;
+        valueLabel.fontSize = nw.edgeLabelSize * nw.NodeSize;
+        weightLabel.margin = new Vector4(0, 0, 0, nw.edgeLabelSize * nw.NodeSize * 0.2f);
+        valueLabel.margin = new Vector4(0, 0, 0, nw.edgeLabelSize * nw.NodeSize * 0.2f);
 
         Vector3 fromPos = Vector3.Lerp(lineRenderer.GetPosition(0), lineRenderer.GetPosition(1), 0.25f);
         Vector3 toPos = Vector3.Lerp(lineRenderer.GetPosition(0), lineRenderer.GetPosition(1), 1f);
@@ -53,12 +53,11 @@ public class EdgeDecoration : IAnimatable
     }
     void InitializeLabels()
     {
-        NetworkVisualiser nodeManager = edge.edge.nodeManager;
-        EdgeRenderer edgeRenderer = edge.edge;
+        Visualizer nw = edge.networkVisualizer;
 
        
         var tempGo = new GameObject("Weight Label");
-        tempGo.transform.SetParent(nodeManager.transform);
+        tempGo.transform.SetParent(nw.transform);
         //tempGo.transform.parent = edgeRenderer.transform;
         weightLabel = tempGo.AddComponent<TextMeshPro>();
         weightLabel.horizontalAlignment = HorizontalAlignmentOptions.Center;
@@ -73,13 +72,13 @@ public class EdgeDecoration : IAnimatable
         valueLabel.horizontalAlignment = HorizontalAlignmentOptions.Center;
         valueLabel.verticalAlignment = VerticalAlignmentOptions.Middle;
         valueLabel.margin = new Vector4(0, 0, 0, 0.5f);
-        tempGo.transform.SetParent(nodeManager.transform);
+        tempGo.transform.SetParent(nw.transform);
 
         HintVisual.Create(tempGo.transform, "Value",new Vector3(0,0.1f,0));
     }
     Quaternion LinePerpendicular()
     {
-        LineRenderer lineRenderer = edge.edge.lineRenderer;
+        LineRenderer lineRenderer = edge.lineRenderer;
         weightLabel.transform.position = Vector3.Lerp(lineRenderer.GetPosition(0), lineRenderer.GetPosition(1), 0.75f);
         Vector3 directionVector = lineRenderer.GetPosition(1) - lineRenderer.GetPosition(0);
         bool LeftToRight = Camera.main.WorldToScreenPoint(lineRenderer.GetPosition(0)).x < Camera.main.WorldToScreenPoint(lineRenderer.GetPosition(1)).x;
@@ -94,7 +93,7 @@ public class EdgeDecoration : IAnimatable
 
     public void Show(float t)
     {
-        weightLabel.text = edge.edge.relationInfo.label;
+        weightLabel.text = edge.edgeInfo.label;
         weightLabel.transform.localScale = (new Vector3(1, 1, 1)) * t;
         valueLabel.transform.localScale = (new Vector3(1, 1, 1)) * t;
     }

@@ -5,7 +5,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.TextCore.Text;
-
+using NeuralNetwork;
 public class NodeValueDecorator : MonoBehaviour,IAnimatable
 {
     public Node node;
@@ -13,7 +13,7 @@ public class NodeValueDecorator : MonoBehaviour,IAnimatable
     private TextMeshPro tmp;
     Vector3 scale;
 
-    public string Name => node.NodeInfo.nodeID + " value decorator";
+    public string Name => node.nodeInfo.nodeID + " value decorator";
 
     private void Awake()
     {
@@ -34,26 +34,26 @@ public class NodeValueDecorator : MonoBehaviour,IAnimatable
     }
     private void Update()
     {
-        scale = node.Go.transform.localScale;
-        transform.position = node.Go.transform.position;
+        scale = node.transform.localScale;
+        transform.position = node.transform.position;
         transform.rotation = Quaternion.LookRotation(transform.position - Camera.main.transform.position);
         //currentValue = Mathf.Lerp(currentValue, node.NodeInfo.act, Time.deltaTime);
-        tmp.text = node.NodeInfo.act.ToString("0.00");
+        tmp.text = node.nodeInfo.act.ToString("0.00");
     }
     public static NodeValueDecorator Create(Node node,float animatedValue)
     {
         GameObject go = new GameObject("Node Value Decorator");
         NodeValueDecorator nvd = go.AddComponent<NodeValueDecorator>();
-        go.transform.SetParent(node.node.nodeManager.transform);
+        go.transform.SetParent(node.networkVisualiser.transform);
         nvd.node = node;
-        nvd.tmp.text = node.NodeInfo.act.ToString("0.##");
+        nvd.tmp.text = node.nodeInfo.act.ToString("0.##");
         nvd.animatedValue = animatedValue;
         return nvd;
     }
 
     public void Animate(float t)
     {
-        tmp.text = Mathf.Lerp(node.NodeInfo.act, animatedValue,t).ToString("0.##"); 
+        tmp.text = Mathf.Lerp(node.nodeInfo.act, animatedValue,t).ToString("0.##"); 
     }
 
     public void Show(float t)
